@@ -1,6 +1,7 @@
 // ============================================================
 // MOTOR EA v4.0 (CMS Edition) — PGMAD/UESB
 // ============================================================
+console.log("🚀 SCRIPT APP.JS INICIADO!");
 
 // --- CONFIGURAÇÃO SUPABASE ---
 const SUPABASE_URL = 'https://tdnwnwldrjnhscgxnane.supabase.co';
