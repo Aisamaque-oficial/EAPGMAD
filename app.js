@@ -9,20 +9,35 @@ const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SU
 
 // --- ESTADO GLOBAL ---
 async function loadConfig() {
-  // 1. Tenta buscar do Supabase
+  console.log("Iniciando carregamento da configuração...");
+  
+  // 1. Tenta buscar do Supabase com um TIMEOUT de 3 segundos
   try {
     if (supabase) {
-      const { data, error } = await supabase.from('portal_config').select('data').eq('id', 1).single();
+      const fetchPromise = supabase.from('portal_config').select('data').eq('id', 1).single();
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout Supabase")), 3000));
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+      
       if (data && data.data) {
-          console.log("Configuração carregada do Supabase");
+          console.log("✅ Configuração carregada do Supabase");
           return data.data;
       }
+      if (error) console.warn("Aviso Supabase:", error.message);
     }
-  } catch (e) { console.error("Erro Supabase:", e); }
+  } catch (e) { 
+    console.error("❌ Erro ou Timeout no Supabase:", e.message); 
+  }
 
-  // 2. Fallback para LocalStorage
+  // 2. Fallback para LocalStorage ou Código Estático
   const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
-  return dynamic ? JSON.parse(dynamic) : CONFIG_DISCIPLINA;
+  if (dynamic) {
+    console.log("📂 Carregando do LocalStorage");
+    return JSON.parse(dynamic);
+  }
+  
+  console.log("📦 Carregando do config.js (Padrão)");
+  return CONFIG_DISCIPLINA;
 }
 
 async function saveConfig(newConfig, skipDashboardRender = false) {
