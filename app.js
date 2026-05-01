@@ -1,5 +1,5 @@
-/* PORTAL EA - ENGINE v4.0 - INSTANT LOAD EDITION */
-console.log("Portal Engine Started - Instant Load");
+/* PORTAL EA - ENGINE v4.1 - EMERGENCY REPAIR */
+console.log("Portal Engine Started - v4.1");
 
 const SUPABASE_URL = 'https://tdnwnwldrjnhscgxnane.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_GIDLJUxHFBIQ7dOO58lqWA_JbPAW1oq';
@@ -11,51 +11,9 @@ try {
     }
 } catch (e) { console.error("Supabase Init Error"); }
 
-async function loadConfig() {
-  console.log("🚀 Carregamento Instantâneo Iniciado");
-  
-  // 1. Pega os dados locais IMEDIATAMENTE (LocalStorage ou config.js)
-  const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
-  let currentConfig = dynamic ? JSON.parse(dynamic) : CONFIG_DISCIPLINA;
-
-  // 2. Tenta atualizar do Supabase em segundo plano (SEM TRAVAR A TELA)
-  if (supabase) {
-    supabase.from('portal_config').select('data').eq('id', 1).single()
-      .then(({ data }) => {
-        if (data && data.data) {
-          console.log("✅ Dados do Supabase sincronizados em background");
-          localStorage.setItem('CONFIG_DISCIPLINA_PORTAL', JSON.stringify(data.data));
-        }
-      })
-      .catch(() => console.warn("Supabase Offline/Bloqueado - Usando local"));
-  }
-
-  return currentConfig;
-}
-
-async function saveConfig(newConfig, skipDashboardRender = false) {
-  localStorage.setItem('CONFIG_DISCIPLINA_PORTAL', JSON.stringify(newConfig));
-  APP_CONFIG = newConfig;
-
-  if (supabase) {
-    await supabase.from('portal_config').upsert({ id: 1, data: newConfig });
-  }
-
-  if (!skipDashboardRender) renderDashboard();
-}
-
-function resetConfig() {
-    if (confirm("Isso apagará suas edições manuais e carregará o padrão do código (config.js). Continuar?")) {
-        localStorage.removeItem('CONFIG_DISCIPLINA_PORTAL');
-        location.reload();
-    }
-}
-
-// --- ESTADO ---
+// --- ESTADO GLOBAL ---
 let APP_CONFIG = null;
 let currentUser = JSON.parse(localStorage.getItem('EA_PORTAL_USER')) || null;
-
-// --- ELEMENTOS (Serão preenchidos no init) ---
 let UI = {};
 
 function populateUI() {
@@ -71,10 +29,28 @@ function populateUI() {
   };
 }
 
+async function loadConfig() {
+  console.log("🚀 Carregamento Instantâneo Iniciado");
+  const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
+  let currentConfig = dynamic ? JSON.parse(dynamic) : CONFIG_DISCIPLINA;
+
+  if (supabase) {
+    supabase.from('portal_config').select('data').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data && data.data) {
+          localStorage.setItem('CONFIG_DISCIPLINA_PORTAL', JSON.stringify(data.data));
+        }
+      })
+      .catch(() => console.warn("Supabase Offline/Bloqueado"));
+  }
+  return currentConfig;
+}
+
 // --- AUTENTICAÇÃO ---
 function login(email) {
   const emailLower = email.toLowerCase().trim();
-  const user = CONFIG_STUDENTS.find(s => s.email.toLowerCase().trim() === emailLower);
+  // Corrigido: usando CONFIG_DISCIPLINA.alunos
+  const user = CONFIG_DISCIPLINA.alunos.find(s => s.email.toLowerCase().trim() === emailLower);
   
   if (user) {
     currentUser = user;
@@ -130,8 +106,13 @@ function renderDashboard() {
 
 function checkModuleAccess(modulo) {
     const now = new Date();
-    const start = new Date(modulo.data_inicio);
-    const end = new Date(modulo.data_fim);
+    // Corrigido: mapeando os nomes de data/hora do config.js
+    const dateStr = modulo.data; // "2026-05-02"
+    const startStr = `${dateStr}T${modulo.inicioHora || '08:00'}:00`;
+    const endStr = `${dateStr}T${modulo.fimHora || '12:00'}:00`;
+    
+    const start = new Date(startStr);
+    const end = new Date(endStr);
     
     if (now < start) {
         const diff = start - now;
@@ -185,7 +166,8 @@ function renderAtividade(mIdx, aIdx) {
   const access = checkModuleAccess(modulo);
   
   document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
-  document.getElementById(`dot-${mIdx}-${aIdx}`).classList.add('active');
+  const dot = document.getElementById(`dot-${mIdx}-${aIdx}`);
+  if (dot) dot.classList.add('active');
   
   let contentHtml = '';
   if (access.locked) {
@@ -199,7 +181,8 @@ function renderAtividade(mIdx, aIdx) {
   } else {
       contentHtml = `
         <div class="card">
-          <h3>${atividade.pergunta}</h3>
+          <!-- Corrigido: usando atividade.enunciado -->
+          <h3>${atividade.enunciado}</h3>
           <p style="color:var(--gray-600); margin-bottom:20px;">${atividade.instrucao || 'Leia o material e responda abaixo:'}</p>
           
           <div class="material-grid">
@@ -224,7 +207,8 @@ function renderAtividade(mIdx, aIdx) {
       `;
   }
   
-  document.getElementById('atividade-container').innerHTML = contentHtml;
+  const container = document.getElementById('atividade-container');
+  if (container) container.innerHTML = contentHtml;
 }
 
 function viewMaterial(tipo, url) {
@@ -244,7 +228,6 @@ function viewMaterial(tipo, url) {
     UI.modalOverlay.classList.add('visible');
 }
 
-// --- PERSISTÊNCIA DE RESPOSTAS ---
 function getSavedAnswer(email, id) {
   const key = `EA_RESP_${email}_${id}`;
   return localStorage.getItem(key) || '';
@@ -253,7 +236,6 @@ function getSavedAnswer(email, id) {
 async function saveAnswer(email, id, value) {
   const key = `EA_RESP_${email}_${id}`;
   localStorage.setItem(key, value);
-  
   if (supabase) {
     try {
       await supabase.from('portal_respostas').upsert({
@@ -261,63 +243,20 @@ async function saveAnswer(email, id, value) {
         pergunta_id: id,
         resposta: value,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'aluno_email, pergunta_id' });
-      console.log("☁️ Resposta sincronizada");
+      });
     } catch (e) { console.error("Erro sincronia resposta", e); }
   }
 }
 
-// --- ADMIN / CMS ---
-window.showModal = function(type, subtype) {
-  UI.modalContent.className = 'modal';
-  if (type === 'Admin') {
-    UI.modalContent.innerHTML = `
-      <h3>Painel Administrativo</h3>
-      <div style="display:grid; gap:10px; margin-top:20px;">
-        <button class="btn-confirm" onclick="exportAnswers()">Exportar Respostas (JSON)</button>
-        <button class="btn-confirm" style="background:var(--secondary)" onclick="resetConfig()">Resetar Padrão (config.js)</button>
-        <button class="btn-confirm" style="background:var(--gray-600)" onclick="closeModal()">Fechar</button>
-      </div>
-    `;
-    UI.modalOverlay.classList.add('visible');
-  }
-}
-
-async function exportAnswers() {
-    let todasRespostas = [];
-    if (supabase) {
-        const { data } = await supabase.from('portal_respostas').select('*');
-        todasRespostas = data;
-    } else {
-        // Fallback local (apenas do usuário atual)
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith('EA_RESP_')) {
-                todasRespostas.push({ key, val: localStorage.getItem(key) });
-            }
-        }
-    }
-    const blob = new Blob([JSON.stringify(todasRespostas, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `relatorio_respostas_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-}
-
 function closeModal() { 
     UI.modalOverlay.classList.remove('visible'); 
-    UI.modalContent.className = 'modal';
 }
 
 async function init() { 
-  populateUI(); // Garante que os elementos do HTML foram encontrados
+  populateUI();
   APP_CONFIG = await loadConfig();
   if (currentUser) renderDashboard(); 
   else renderLogin(); 
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded. Booting system...");
-    init();
-});
+document.addEventListener('DOMContentLoaded', init);
