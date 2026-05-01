@@ -13,7 +13,14 @@ try {
 
 // --- ESTADO GLOBAL ---
 let APP_CONFIG = null;
-let currentUser = JSON.parse(localStorage.getItem('EA_PORTAL_USER')) || null;
+let currentUser = null;
+try {
+    const storedUser = localStorage.getItem('EA_PORTAL_USER');
+    if (storedUser) currentUser = JSON.parse(storedUser);
+} catch (e) {
+    localStorage.removeItem('EA_PORTAL_USER');
+    console.warn("Corrupted user data cleared.");
+}
 let UI = {};
 
 function populateUI() {
@@ -31,8 +38,14 @@ function populateUI() {
 
 async function loadConfig() {
   console.log("🚀 Carregamento Instantâneo Iniciado");
-  const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
-  let currentConfig = dynamic ? JSON.parse(dynamic) : CONFIG_DISCIPLINA;
+  let currentConfig = CONFIG_DISCIPLINA;
+  try {
+      const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
+      if (dynamic) currentConfig = JSON.parse(dynamic);
+  } catch (e) {
+      localStorage.removeItem('CONFIG_DISCIPLINA_PORTAL');
+      console.warn("Corrupted config data cleared.");
+  }
 
   if (supabase) {
     supabase.from('portal_config').select('data').eq('id', 1).single()
