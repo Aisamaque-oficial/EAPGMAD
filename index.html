@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- CABEÇALHO INSTITUCIONAL -->
     <header class="app-header" id="app-header">
         <div class="header-left">
             <div class="header-logo">🎓</div>
@@ -23,29 +21,20 @@
             <button class="btn-confirm" style="background:var(--gray-200); color:var(--gray-600); padding:8px 20px" onclick="logout()">Sair</button>
         </div>
     </header>
-
-    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="login-screen">
         <div style="padding: 40px; text-align: center; width: 100%;">Carregando sistema...</div>
     </div>
-
-    <!-- LAYOUT PRINCIPAL -->
     <div class="app-layout" id="app-layout">
         <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content" id="main-content"></main>
     </div>
-
-    <!-- COMPONENTES GLOBAIS -->
     <div id="admin-badge" class="admin-badge" style="display:none">
         <span class="dot"></span> Modo Administrador Ativo
-        <button class="btn-admin-tool" onclick="showModal('Admin Tool', 'Editor JSON em desenvolvimento')">Ferramentas</button>
+        <button class="btn-admin-tool" onclick="showModal('Admin Tool', 'Ferramentas de Gerenciamento')">Ferramentas</button>
     </div>
-
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="modal-content"></div>
     </div>
-
-    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="app.js"></script>
