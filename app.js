@@ -621,4 +621,8 @@ async function init() {
   if (currentUser) renderDashboard(); 
   else renderLogin(); 
 }
-document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded. Booting system...");
+    init();
+});
