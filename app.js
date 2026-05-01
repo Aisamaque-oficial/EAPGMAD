@@ -5,11 +5,15 @@ const SUPABASE_URL = 'https://tdnwnwldrjnhscgxnane.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_GIDLJUxHFBIQ7dOO58lqWA_JbPAW1oq';
 let supabase = null;
 
+// [MANUTENÇÃO] Supabase desativado porque o projeto foi deletado.
+// Isso evita erros vermelhos no console e permite o uso local.
+/*
 try {
     if (window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 } catch (e) { console.error("Supabase Init Error"); }
+*/
 
 // --- ESTADO GLOBAL ---
 let APP_CONFIG = null;
