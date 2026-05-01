@@ -14,30 +14,22 @@ try {
 async function loadConfig() {
   console.log("Iniciando carregamento da configuração...");
   
-  // 1. Tenta buscar do Supabase com um TIMEOUT de 3 segundos
   try {
     if (supabase) {
-      alert("DEBUG 1: Tentando conectar ao Supabase...");
-      
       const fetchPromise = supabase.from('portal_config').select('data').eq('id', 1).single();
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout Supabase")), 3000));
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000));
       
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
       
       if (data && data.data) {
-          alert("DEBUG 2: Dados recebidos com SUCESSO!");
+          console.log("✅ Configuração carregada do Supabase");
           return data.data;
-      }
-      if (error) {
-          alert("DEBUG 2: Erro no Supabase: " + error.message);
       }
     }
   } catch (e) { 
-    alert("DEBUG 2: Falha crítica ou Timeout: " + e.message);
+    console.warn("⚠️ Usando backup local (Supabase indisponível)");
   }
 
-  // 2. Fallback para LocalStorage ou Código Estático
-  alert("DEBUG 3: Usando backup local/config.js");
   const dynamic = localStorage.getItem('CONFIG_DISCIPLINA_PORTAL');
   if (dynamic) {
     console.log("📂 Carregando do LocalStorage");

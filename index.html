@@ -2,19 +2,50 @@
 <html lang="pt-BR" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
-    <title>Teste de Vida - Portal EA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal EA - PGMAD/UESB</title>
+    <meta name="google" content="notranslate">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="login-screen">
-        <h1 id="status-teste">Verificando scripts...</h1>
+    <header class="app-header" id="app-header">
+        <div class="header-left">
+            <div class="header-logo">🎓</div>
+            <div class="header-title-group">
+                <h1>Portal EA - PGMAD/UESB</h1>
+                <div class="header-user" id="header-user-name">Carregando...</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-confirm" style="background:var(--gray-200); color:var(--gray-600); padding:8px 20px" onclick="logout()">Sair</button>
+        </div>
+    </header>
+
+    <div id="login-screen" class="login-screen">
+        <div style="padding: 40px; text-align: center; width: 100%;">
+            <div class="spinner"></div>
+            <p>Conectando ao sistema...</p>
+        </div>
     </div>
-    
-    <!-- Teste direto sem dependências externas por 1 commit -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('status-teste').innerText = "✅ JAVASCRIPT FUNCIONANDO!";
-            alert("O navegador está executando código!");
-        });
-    </script>
+
+    <div class="app-layout" id="app-layout" style="display:none">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content" id="main-content"></main>
+    </div>
+
+    <div id="admin-badge" class="admin-badge" style="display:none">
+        <span class="dot"></span> Administrador
+        <button class="btn-admin-tool" onclick="showModal('Admin', 'Painel')">Ferramentas</button>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal-content"></div>
+    </div>
+
+    <!-- Scripts com Cache Busting v4.0 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js?v=4.0"></script>
+    <script src="app.js?v=4.0"></script>
 </body>
 </html>
