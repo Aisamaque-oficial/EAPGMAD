@@ -1,5 +1,5 @@
-/* PORTAL EA - ENGINE v4.0 */
-console.log("Portal Engine Started");
+/* PORTAL EA - ENGINE v4.0 - VERIFIED DEPLOY v2.0 */
+console.log("Portal Engine Started - v2.0");
 
 const SUPABASE_URL = 'https://tdnwnwldrjnhscgxnane.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_GIDLJUxHFBIQ7dOO58lqWA_JbPAW1oq';
