@@ -55,17 +55,21 @@ function resetConfig() {
 let APP_CONFIG = null;
 let currentUser = JSON.parse(localStorage.getItem('EA_PORTAL_USER')) || null;
 
-// --- ELEMENTOS ---
-const UI = {
-  headerName: document.getElementById('header-user-name'),
-  sidebar: document.getElementById('sidebar'),
-  mainContent: document.getElementById('main-content'),
-  loginScreen: document.getElementById('login-screen'),
-  appLayout: document.getElementById('app-layout'),
-  modalOverlay: document.getElementById('modal-overlay'),
-  modalContent: document.getElementById('modal-content'),
-  adminBadge: document.getElementById('admin-badge')
-};
+// --- ELEMENTOS (Serão preenchidos no init) ---
+let UI = {};
+
+function populateUI() {
+  UI = {
+    headerName: document.getElementById('header-user-name'),
+    sidebar: document.getElementById('sidebar'),
+    mainContent: document.getElementById('main-content'),
+    loginScreen: document.getElementById('login-screen'),
+    appLayout: document.getElementById('app-layout'),
+    modalOverlay: document.getElementById('modal-overlay'),
+    modalContent: document.getElementById('modal-content'),
+    adminBadge: document.getElementById('admin-badge')
+  };
+}
 
 // --- AUTENTICAÇÃO ---
 function login(email) {
@@ -307,6 +311,7 @@ function closeModal() {
 }
 
 async function init() { 
+  populateUI(); // Garante que os elementos do HTML foram encontrados
   APP_CONFIG = await loadConfig();
   if (currentUser) renderDashboard(); 
   else renderLogin(); 
