@@ -1,14 +1,16 @@
-// ============================================================
-// MOTOR EA v4.0 (CMS Edition) — PGMAD/UESB
-// ============================================================
-console.log("🚀 SCRIPT APP.JS INICIADO!");
+/* PORTAL EA - ENGINE v4.0 */
+console.log("Portal Engine Started");
 
-// --- CONFIGURAÇÃO SUPABASE ---
 const SUPABASE_URL = 'https://tdnwnwldrjnhscgxnane.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_GIDLJUxHFBIQ7dOO58lqWA_JbPAW1oq';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let supabase = null;
 
-// --- ESTADO GLOBAL ---
+try {
+    if (window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+} catch (e) { console.error("Supabase Init Error"); }
+
 async function loadConfig() {
   console.log("Iniciando carregamento da configuração...");
   
